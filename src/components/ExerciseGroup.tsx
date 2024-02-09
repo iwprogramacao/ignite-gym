@@ -22,7 +22,6 @@ export function ExerciseGroup({ name, ...rest }: Props) {
         textTransform="uppercase"
         fontSize="xs"
         fontWeight="bold"
-        onPress={() => console.log('pressed')}
       >
         {name}
       </Text>
