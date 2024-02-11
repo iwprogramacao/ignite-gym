@@ -12,11 +12,16 @@ import {
 } from 'native-base';
 import { useState } from 'react';
 import { TouchableOpacity } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 
 const PHOTO_SIZE = 33;
 
 export function Profile() {
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
+
+  async function handleUserPhotoSelect() {
+    await ImagePicker.launchImageLibraryAsync();
+  }
 
   return (
     <VStack flex={1}>
@@ -40,7 +45,7 @@ export function Profile() {
             />
           )}
 
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleUserPhotoSelect}>
             <Text fontFamily="heading" color="green.500" mt={3} mb={8}>
               Alterar foto
             </Text>
