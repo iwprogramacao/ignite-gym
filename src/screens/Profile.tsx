@@ -9,18 +9,59 @@ import {
   VStack,
   Skeleton,
   Heading,
+  useToast,
 } from 'native-base';
 import { useState } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { Alert, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+import { FileInfo } from 'expo-file-system';
 
 const PHOTO_SIZE = 33;
 
 export function Profile() {
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
+  const [userPhoto, setUserPhoto] = useState(
+    'https://github.com/iwprogramacao.png'
+  );
+  const toast = useToast();
 
   async function handleUserPhotoSelect() {
-    await ImagePicker.launchImageLibraryAsync();
+    setPhotoIsLoading(true);
+    try {
+      const photoSelected = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+        aspect: [4, 4],
+        allowsEditing: true,
+      });
+      console.log(photoSelected);
+      if (photoSelected.canceled) {
+        return;
+      }
+      if (photoSelected.assets[0].uri) {
+        const photoInfo = (await FileSystem.getInfoAsync(
+          photoSelected.assets[0].uri
+        )) as FileInfo;
+
+        if (photoInfo.size && photoInfo.size / 1024 / 1024 > 5) {
+          return toast.show({
+            title: 'Escolha uma imagem de até 5MB máximos',
+            placement: 'top',
+            bgColor: 'red.500',
+          });
+          // Alert.alert('Escolha uma imagem de até 5MB máximos');
+        }
+
+        setUserPhoto(photoSelected.assets[0].uri);
+      } else {
+        Alert.alert('Não foi possível obter a imagem');
+      }
+    } catch (error) {
+      Alert.alert('Não foi possível atualizar a imagem');
+    } finally {
+      setPhotoIsLoading(false);
+    }
   }
 
   return (
@@ -40,7 +81,7 @@ export function Profile() {
           ) : (
             <UserPhoto
               size={PHOTO_SIZE}
-              source={{ uri: 'https://github.com/iwprogramacao.png' }}
+              source={{ uri: userPhoto }}
               alt="Imagem do usuário"
             />
           )}

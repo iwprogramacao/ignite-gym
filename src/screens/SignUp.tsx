@@ -1,24 +1,58 @@
-import {
-  Center,
-  Heading,
-  Image,
-  Text,
-  VStack,
-  ScrollView,
-  useTheme,
-} from 'native-base';
+import { Center, Heading, Image, Text, VStack, ScrollView } from 'native-base';
 import BackgroundImg from '@assets/background.png';
 import LogoSvg from '@assets/logo.svg';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 import { useNavigation } from '@react-navigation/native';
-import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
+import { Controller, useForm } from 'react-hook-form';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+
+type FormDataProps = {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+};
+
+const signUpSchema = yup.object({
+  name: yup.string().required('Informe um nome para continuar.'),
+  email: yup
+    .string()
+    .required('Informe um e-mail para continuar.')
+    .email('Deve ser um e-mail válido.')
+    .min(6, 'A senha deve conter pelo menos 6 caracteres.'),
+  password: yup
+    .string()
+    .required('Informe uma senha para continuar.')
+    .min(6, 'A senha deve conter pelo menos 6 caracteres.'),
+  password_confirmation: yup
+    .string()
+    .required('Repita a senha aqui para continuar.')
+    .oneOf([yup.ref('password')], 'As senhas devem ser iguais.'),
+});
 
 export function SignUp() {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormDataProps>({
+    resolver: yupResolver(signUpSchema),
+  });
   const navigation = useNavigation();
 
   function handleGoBack() {
     navigation.goBack();
+  }
+
+  function handleSignUp({
+    name,
+    email,
+    password,
+    password_confirmation,
+  }: FormDataProps) {
+    console.log({ name, email, password, password_confirmation });
   }
 
   return (
@@ -48,16 +82,78 @@ export function SignUp() {
             Crie sua conta
           </Heading>
 
-          <Input placeholder="Nome" />
-          <Input
-            placeholder="E-mail"
-            keyboardType="email-address"
-            autoCapitalize="none"
+          {/* {errors.name && <Text color="gray.100">{errors.name.message}</Text>} Exemplo de mensagem de erro de validação */}
+          <Controller
+            name="name"
+            // rules={{   Validação sem yup
+            //   required: 'Informe um  nome para continuar.',
+            // }}
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <Input
+                placeholder="Nome"
+                onChangeText={onChange}
+                value={value}
+                errorMessage={errors.name?.message}
+              />
+            )}
           />
-          <Input placeholder="Senha" secureTextEntry />
+          {/* {errors.email && <Text color="gray.100">{errors.email.message}</Text>} */}
+          <Controller
+            name="email"
+            // rules={{
+            //   required: 'Informe um e-mail para continuar.',
+            //   pattern: {
+            //     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+            //     message: 'E-mail inválido',
+            //   },
+            // }}
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <Input
+                placeholder="E-mail"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                onChangeText={onChange}
+                value={value}
+                errorMessage={errors.email?.message}
+              />
+            )}
+          />
+          <Controller
+            name="password"
+            // rules={{
+            //   required: 'Informe uma senha para continuar.',
+            // }}
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <Input
+                placeholder="Senha"
+                secureTextEntry
+                onChangeText={onChange}
+                value={value}
+                errorMessage={errors.password?.message}
+              />
+            )}
+          />
+          <Controller
+            name="password_confirmation"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <Input
+                placeholder="Confirme a senha"
+                secureTextEntry
+                onChangeText={onChange}
+                value={value}
+                onSubmitEditing={handleSubmit(handleSignUp)}
+                returnKeyType="send"
+                errorMessage={errors.password_confirmation?.message}
+              />
+            )}
+          />
         </Center>
 
-        <Button title="Criar e acessar" />
+        <Button title="Criar e acessar" onPress={handleSubmit(handleSignUp)} />
 
         <Button
           title="Voltar ao login"

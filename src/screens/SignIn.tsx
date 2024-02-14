@@ -1,20 +1,14 @@
-import {
-  Center,
-  Heading,
-  Image,
-  Text,
-  VStack,
-  ScrollView,
-  useTheme,
-} from 'native-base';
+import { Center, Heading, Image, Text, VStack, ScrollView } from 'native-base';
 import BackgroundImg from '@assets/background.png';
 import LogoSvg from '@assets/logo.svg';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 import { useNavigation } from '@react-navigation/native';
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
+import { useForm } from 'react-hook-form';
 
 export function SignIn() {
+  const { control } = useForm();
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
 
   function handleNewAccount() {
