@@ -1,4 +1,12 @@
-import { Center, Heading, Image, Text, VStack, ScrollView } from 'native-base';
+import {
+  Center,
+  Heading,
+  Image,
+  Text,
+  VStack,
+  ScrollView,
+  useToast,
+} from 'native-base';
 import BackgroundImg from '@assets/background.png';
 import LogoSvg from '@assets/logo.svg';
 import { Input } from '@components/Input';
@@ -8,8 +16,7 @@ import { Controller, useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { api } from 'src/service/api';
-import axios from 'axios';
-import { Alert } from 'react-native';
+import { AppError } from '@utils/AppError';
 
 type FormDataProps = {
   name: string;
@@ -44,43 +51,76 @@ export function SignUp() {
     resolver: yupResolver(signUpSchema),
   });
   const navigation = useNavigation();
+  const toast = useToast();
 
   function handleGoBack() {
     navigation.goBack();
   }
 
-  async function handleSignUp({ name, email, password }: FormDataProps) {
-    /* const response = await fetch('http://127.0.0.1:3333/users', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, email, password }),
-    });
+  // async function handleSignUp({ name, email, password }: FormDataProps) {
+  //   /* const response = await fetch('http://127.0.0.1:3333/users', {
+  //     method: 'POST',
+  //     headers: {
+  //       Accept: 'application/json',
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({ name, email, password }),
+  //   });
 
-    const data = await response.json();
-    console.log(data); */
-    /* await fetch('http://127.0.0.1:3333/users', {
-    
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, email, password }),
-    })
-      .then((response) => response.json())
-      .then((data) => console.log(data)); 
-      */
+  //   const data = await response.json();
+  //   console.log(data); */
+  //   /* await fetch('http://127.0.0.1:3333/users', {
+
+  //     method: 'POST',
+  //     headers: {
+  //       Accept: 'application/json',
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({ name, email, password }),
+  //   })
+  //     .then((response) => response.json())
+  //     .then((data) => console.log(data));
+  //     */
+  //   const toast = useToast();
+
+  //   try {
+  //     const response = await api.post('/users', { name, email, password });
+  //     console.log(response.data);
+  //   } catch (error) {
+  //     console.log('entrou');
+  //     const isAppError = error instanceof AppError;
+
+  //     console.log('entrou');
+  //     const title = isAppError
+  //       ? error.message
+  //       : 'Não foi possível criar a conta. Tente novamente mais tarde.';
+  //     console.log('entrou');
+
+  //     toast.show({
+  //       title,
+  //       placement: 'top',
+  //       bgColor: 'red.500',
+  //     });
+  //   }
+  // }
+
+  async function handleSignUp({ name, email, password }: FormDataProps) {
     try {
       const response = await api.post('/users', { name, email, password });
       console.log(response.data);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        return Alert.alert(error.response?.data.message);
-      }
-      // console.log(error);
+      const isAppError = error instanceof AppError;
+
+      const title = isAppError
+        ? error.message
+        : 'Não foi possível criar a conta. Tente novamente mais tarde';
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500',
+        textAlign: 'center',
+      });
     }
   }
 
