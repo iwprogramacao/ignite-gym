@@ -30,8 +30,7 @@ const signUpSchema = yup.object({
   email: yup
     .string()
     .required('Informe um e-mail para continuar.')
-    .email('Deve ser um e-mail válido.')
-    .min(6, 'A senha deve conter pelo menos 6 caracteres.'),
+    .email('Deve ser um e-mail válido.'),
   password: yup
     .string()
     .required('Informe uma senha para continuar.')

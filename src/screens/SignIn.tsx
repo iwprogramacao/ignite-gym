@@ -1,18 +1,75 @@
-import { Center, Heading, Image, Text, VStack, ScrollView } from 'native-base';
+import {
+  Center,
+  Heading,
+  Image,
+  Text,
+  VStack,
+  ScrollView,
+  useToast,
+} from 'native-base';
 import BackgroundImg from '@assets/background.png';
 import LogoSvg from '@assets/logo.svg';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 import { useNavigation } from '@react-navigation/native';
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useAuth } from '@hooks/useAuth';
+import { AppError } from '@utils/AppError';
+import { useState } from 'react';
+
+type FormData = {
+  email: string;
+  password: string;
+};
+
+const signInSchema = yup.object({
+  email: yup
+    .string()
+    .email('O e-mail deve ser válido.')
+    .required('Insira seu e-mail para continuar.'),
+  password: yup
+    .string()
+    .required('Informe uma senha para continuar.')
+    .min(6, 'A senha deve conter pelo menos 6 caracteres.'),
+});
 
 export function SignIn() {
-  const { control } = useForm();
+  const { signIn } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({ resolver: yupResolver(signInSchema) });
+
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
+  const toast = useToast();
 
   function handleNewAccount() {
     navigation.navigate('signUp');
+  }
+
+  async function handleSignIn({ email, password }: FormData) {
+    try {
+      setIsLoading(true);
+      await signIn(email, password);
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const title = isAppError
+        ? error.message
+        : 'Não foi possível logar. Tente novamente mais tarde';
+
+      setIsLoading(false);
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500',
+      });
+    }
   }
 
   return (
@@ -42,15 +99,42 @@ export function SignIn() {
             Acesse sua conta
           </Heading>
 
-          <Input
-            placeholder="E-mail"
-            keyboardType="email-address"
-            autoCapitalize="none"
+          <Controller
+            name="email"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <Input
+                placeholder="E-mail"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                onChangeText={onChange}
+                value={value}
+                errorMessage={errors.email?.message}
+              />
+            )}
           />
-          <Input placeholder="Senha" secureTextEntry />
+          <Controller
+            name="password"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <Input
+                placeholder="Senha"
+                onChangeText={onChange}
+                secureTextEntry
+                value={value}
+                errorMessage={errors.password?.message}
+                returnKeyType="send"
+                onSubmitEditing={handleSubmit(handleSignIn)}
+              />
+            )}
+          />
         </Center>
 
-        <Button title="Acessar" />
+        <Button
+          title="Acessar"
+          onPress={handleSubmit(handleSignIn)}
+          isLoading={isLoading}
+        />
 
         <Center mt={24}>
           <Text
