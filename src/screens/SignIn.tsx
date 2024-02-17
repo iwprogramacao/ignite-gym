@@ -38,7 +38,7 @@ const signInSchema = yup.object({
 
 export function SignIn() {
   const { signIn } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const {
     control,
     handleSubmit,
