@@ -1,9 +1,16 @@
+import axios, { AxiosInstance } from 'axios';
+
 import { AppError } from '@utils/AppError';
-import axios from 'axios';
+
+type SignOut = () => void;
+
+type APIInstanceProps = AxiosInstance & {
+  registerInterceptTokenManager: (signOut: SignOut) => () => void;
+};
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:3333',
-});
+  baseURL: 'http://192.168.0.112:3333',
+}) as APIInstanceProps;
 
 api.interceptors.response.use(
   (response) => {

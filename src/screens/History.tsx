@@ -1,12 +1,12 @@
+import { Heading, SectionList, Text, useToast, VStack } from 'native-base';
+import { useCallback, useState } from 'react';
+import { api } from 'src/service/api';
 import { HistoryCard } from '@components/HistoryCard';
 import { Loading } from '@components/Loading';
 import { ScreenHeader } from '@components/ScreenHeader';
 import { HistoryByDayDTO } from '@dtos/HistoryByDayDTO';
 import { useFocusEffect } from '@react-navigation/native';
 import { AppError } from '@utils/AppError';
-import { Heading, SectionList, Text, VStack, useToast } from 'native-base';
-import { useCallback, useState } from 'react';
-import { api } from 'src/service/api';
 
 export function History() {
   const [exercises, setExercises] = useState<HistoryByDayDTO[]>([]);
@@ -19,7 +19,6 @@ export function History() {
       setIsLoading(true);
 
       const response = await api.get('/history');
-      console.log(response.data);
 
       setExercises(response.data);
     } catch (error) {
@@ -53,7 +52,7 @@ export function History() {
         <SectionList
           sections={exercises}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <HistoryCard />}
+          renderItem={({ item }) => <HistoryCard data={item} />}
           renderSectionHeader={({ section }) => (
             <VStack bgColor="gray.700">
               <Heading color="gray.200" fontSize="lg" w="full" mt={10} mb={3}>

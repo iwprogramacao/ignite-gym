@@ -19,6 +19,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuth } from '@hooks/useAuth';
 import { AppError } from '@utils/AppError';
 import { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AUTH_TOKEN_STORAGE } from '@storage/storageConfig';
 
 type FormData = {
   email: string;
